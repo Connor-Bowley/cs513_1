@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<nav id="nav01"></nav>
+		<script src="NavScript.js"></script>
+		<h3>Games</h3>
+		<table>
+			<tr><th>ASIN</th><th>Title</th><th>Price</th></tr>
+			<tbody id="games"></tbody>
+		</table>
+		<h3>Developers</h3>
+		<table>
+			<tr><th>ID</th><th>Name</th></tr>
+			<tbody id="developers"></tbody>
+		</table>
+		<h3>Customers</h3>
+		<table>
+			<tr><th>ID</th><th>Name</th></tr>
+			<tbody id="customers"></tbody>
+		</table>
+
+		<script>
+			var url_params = new URL(window.location).searchParams;
+			setNav(url_params.get("id"));
+
+			var url = "../../cgi-bin/513/1/ListData.cgi?id="+url_params.get("id");
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function(){
+				if(this.readyState == 4 && this.status == 200){
+					processData(this.responseText);
+				}
+			}
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send();
+
+			function processData(response){
+				if(response == "")
+					return;
+				var arr = JSON.parse(response);
+				var game_out = "";
+				var dev_out = "";
+				var cust_out = "";
+				var my_id = url_params.get("id");
+				for(var i = 0; i < arr[0].length; i++){
+					dev_out += '<tr><td>'+arr[0][i].Id+'</td><td><a href="view_developer.html?id='+my_id+'&did='+arr[0][i].Id+'">'+arr[0][i].Name+'</a></td></tr>';
+				}
+				document.getElementById("developers").innerHTML = dev_out;
+				for(var i = 0; i < arr[1].length; i++){
+					game_out += '<tr><td>'+arr[1][i].Asin+'</td><td><a href="view_games.html?id='+my_id+'&asin='+arr[1][i].Asin+'">'+arr[1][i].Title+'</a></td><td>'+arr[1][i].Price+'</td></tr>';
+				}
+				document.getElementById("games").innerHTML = game_out;
+				for(var i = 0; i < arr[2].length; i++){
+					cust_out += '<tr><td>'+arr[2][i].Id+'</td><td><a href="view_customer.html?id='+my_id+'&cid='+arr[2][i].Id+'">'+arr[2][i].Name+'</a></td></tr>';
+				}
+				document.getElementById("customers").innerHTML = cust_out;
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<nav id="nav01"></nav>
+		<script src="NavScript.js" type="text/JavaScript"></script>
+		<div id="alert" class="alert" style="display:none"></div>
+		<h3>Change Game Prices</h3>
+		<table>
+		<tr><th>ASIN</th><th>Title</th><th>Price</th></tr>
+		<tbody id="games"></tbody>
+		</table>
+		<button id="Submit" onclick="updatePrices()">Submit</button>
+
+		<script>
+		console.log("log test");
+		var url_params = new URL(window.location).searchParams;
+		setNav(url_params.get("id"));
+		var games_url = "../../cgi-bin/513/1/SearchGames.cgi";
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function(){
+			if(this.readyState == 4 && this.status == 200){
+				showGames(this.responseText);
+			}
+		}
+		xmlhttp.open("GET",games_url,true);
+		xmlhttp.send();
+
+		function showGames(response){
+			if(response == ""){
+				console.log("was empty");
+				return;
+			}
+			var arr = JSON.parse(response);
+			var out = "";
+			for(var i = 0; i < arr.length; i++){
+				out += '<tr><td>'+arr[i].Asin+'</td><td>'+arr[i].Title+'</td><td><input id="'+arr[i].Asin+'" type="number" name="price[]" step="0.01" min="0.00" onchange="addChange(this)" value="'+arr[i].Price+'"/></td></tr>';
+			}
+			document.getElementById("games").innerHTML = out;
+		}
+		function addChange( obj ){
+			obj.className += " changed";
+		}
+		function updatePrices(){
+			var inputs = document.querySelectorAll('input[name="price[]"].changed');
+			var params = [];
+			for(var i = 0; i < inputs.length; i++){
+				params.push("asin="+encodeURIComponent(inputs[i].id));
+				params.push("price="+encodeURIComponent(inputs[i].value));
+				inputs[i].classList.remove("changed");
+			}
+			var param_str = params.join("&");
+			var url = "../../cgi-bin/513/1/PriceGames.cgi";
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function(){
+				if(this.readyState == 4 && this.status == 200){
+					priceResponse(this.responseText);
+				}
+			}
+			xmlhttp.open("POST",url,true);
+			xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xmlhttp.send(param_str);
+		}
+		function priceResponse(response){
+			var info = JSON.parse(response);
+			var a = document.getElementById("alert");
+			a.style.display = "block";
+			a.innerHTML = info.message;
+			if(info.success){
+				a.className += "alert-success";
+			}
+			else {
+				a.className += "alert-failure";
+			}
+		}
+		</script>
+	</body>
+</html>

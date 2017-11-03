@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<nav id="nav01"></nav>
+		<script src="NavScript.js" type="text/JavaScript"></script>
+		<span id="debug"></span>
+		<h3 id="cust_name"></h3>
+		<p>ID: <span id="cust_id"></span>
+		<br />
+		<span id="cust_account"></span>
+		<script>
+			setNav(new URL(window.location).searchParams.get('id'));
+			var url_params = new URL(window.location).searchParams;
+			var xmlhttp = new XMLHttpRequest();
+			var url = "../../cgi-bin/513/1/FullCustInfo.cgi"+window.location.search;
+			xmlhttp.onreadystatechange = function()
+			{
+				//document.getElementById("debug").innerHTML = this.responseText + " " + this.readyState + " " + this.status
+				if(this.readyState == 4 && this.status == 200)
+				{
+					parseCustInfo( this.responseText );
+				}
+			}
+
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send();
+
+			function parseCustInfo( response )
+			{
+				if(response == ""){
+					document.getElementById("debug").innerHTML = "empty";
+					return;
+				}
+				var info = JSON.parse(response);
+				if(info.hasOwnProperty("Name")){
+					document.getElementById("cust_name").innerHTML = info.Name;
+				}
+				if(info.hasOwnProperty("Id")){
+					document.getElementById("cust_id").innerHTML = info.Id;
+				}
+				if(info.hasOwnProperty("Account")){
+					var arr = info.Account;
+					var out = "";
+					if(arr.length == 0){
+						out += "No purchased games";
+					}
+					else {
+						out += "<table><tr><th>Title</th><th>Quantity</th><th>Money Spent</th></tr>";
+						var i;
+						for(i = 0; i < arr.length; i++){
+							out += "<tr><td><a href=\"view_games.html?asin=" + arr[i].Asin + "&id="+url_params.get("id")+"\">" + arr[i].Title + "</a></td><td>" + arr[i].Quantity + "</td><td>$" + arr[i].Cost + "</td></tr>";
+						}
+						out += "</table>";
+					}
+					document.getElementById("cust_account").innerHTML = out;
+				}
+				else
+				{
+					document.getElementById("cust_account").innerHTML = "No purchased games";
+				}
+			}
+		</script>
+	</body>
+</html>

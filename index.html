@@ -1,0 +1,41 @@
+<html>
+	<body>
+		<h3>Developer Registration</h3>
+		<a href="register_developer.html">Register Developer</a>
+		<h3>Customer Sign In</h3>
+		<div>Enter Name and click Login.<br>If already registered, you will login.<br>If not registered, you will be registered and login.</div>
+		<input type="text" id="cname" />
+		<button onclick="custLogin()">Login</button>
+		<h3>System Admin</h3>
+		<div>Login as System Admin</div>
+		<button onclick="adminLogin()">Admin Login</button>
+
+		<script>
+			function adminLogin(){
+				window.location.href = "list_data.html?id=0";
+			}
+			function custLogin(){
+				var url = "../../cgi-bin/513/1/CreateCust.cgi";
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function(){
+					if(this.readyState == 4 && this.status == 200)
+						processResponse(this.responseText);
+				}
+				var param = "name="+document.getElementById("cname").value;
+				xmlhttp.open("POST",url,true);
+				xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				xmlhttp.send(param);
+			}
+			function processResponse(response){
+				var info = JSON.parse(response);
+				if(info.success){
+					window.location.href = "view_customer.html?id="+info.Id+"&cid="+info.Id;
+				}
+				else {
+					document.getElementById("alert").innerHTML = "Unable to log in";
+				}
+			}
+
+		</script>
+	</body>
+</html>
