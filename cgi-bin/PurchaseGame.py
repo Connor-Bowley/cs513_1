@@ -9,7 +9,7 @@ form = cgi.FieldStorage()
 #can also do form.getlist
 
 connection, cursor = None,None
-out = {"success":False}
+out = {"success":False,"message":"Unable to purchase games"}
 try:
 	connection = Oracle.connect("cbowley","secrets","oracle1.aero.und.edu:1521/cs513.aero.und.edu")
 
@@ -17,20 +17,30 @@ try:
 	cid = form.getvalue("id","-1")
 	games = form.getlist("asin")
 	quantities = form.getlist("quantity")
-	if cid == "-1" or len(games) == 0 or len(quantities) == 0 or len(quantities) != len(games):
-		out["error"] = str(cid) + " " + str(games) + " " + str(quantities) 
-		raise Exception()
-	query = "BEGIN "
-	for game, quantity in zip(games, quantities):
-		query += "purchase_game("+cid+",'"+game+"',"+quantity+");"
-	query += "END;"
-		
-
-	cursor.execute(query)
-	connection.commit()
-	out["success"] = True
+	if cid != "" and int(cid) <= 0:
+		out["message"] = "Admin not permitted to purchase games"
+	elif len(games) != len(quantities):
+		out["message"] = "Inconsistent lengths for games and quantities. Contact sys admin."
+	elif len(games) == 0:
+		out["message"] = "No games were selected"
+	else:
+		query = "BEGIN "
+		hits = 0
+		for game, quantity in zip(games, quantities):
+			if int(quantity) != 0:
+				hits += 1
+				query += "purchase_game("+cid+",'"+game+"',"+quantity+");"
+		query += "END;"
+			
+		if hits > 0:
+			cursor.execute(query)
+			connection.commit()
+			out["success"] = True
+			out["message"] = "Successfully purchased games"
+		else:
+			out["message"] = "All game quantities were 0"
 except (Oracle.DatabaseError, Exception) as e:
-	print "Exception was: ", traceback.format_exc();
+	out["message"] = "Exception was: ", traceback.format_exc();
 finally:
 	if cursor is not None:
 		cursor.close()

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<body>
+		<link rel="stylesheet" href="styles.css">
 		<nav id="nav01"></nav>
 		<script src="NavScript.js"></script>
 		<h3>Delete Developers</h3>
@@ -12,6 +13,7 @@
 </html>
 
 <script>
+	setNav(new URL(window.location).searchParams.get("id"));
 	var xmlhttp = new XMLHttpRequest();
 	var url = "../../cgi-bin/513/1/DeveloperInfo.cgi";
 	xmlhttp.onreadystatechange = function()

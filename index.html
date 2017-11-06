@@ -1,5 +1,7 @@
 <html>
 	<body>
+		<link rel="stylesheet" href="styles.css">
+		<div id="alert" ></div>
 		<h3>Developer Registration</h3>
 		<a href="register_developer.html">Register Developer</a>
 		<h3>Customer Sign In</h3>
@@ -12,6 +14,8 @@
 		
 		<h3>Display Source</h3>
 		<a href="https://github.com/Connor-Bowley/cs513_1">Source</a>
+		<h3>Reset System</h3>
+		<button onclick="systemReset()">Reset</button>
 		<script>
 			function adminLogin(){
 				window.location.href = "list_data.html?id=0";
@@ -37,7 +41,21 @@
 					document.getElementById("alert").innerHTML = "Unable to log in";
 				}
 			}
-
+			function systemReset(){
+				var url	= "../../cgi-bin/513/1/Reset.cgi";
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.onreadystatechange = function(){
+					if(this.readyState == 4 && this.status == 200){
+						var info = JSON.parse(this.responseText);
+						if(info.success)
+							document.getElementById("alert").innerHTML = "Reset successful";
+						else
+							document.getElementById("alert").innerHTML = "Reset failed";
+					}
+				}
+				xmlhttp.open("GET",url,true);
+				xmlhttp.send();
+			}
 		</script>
 	</body>
 </html>
