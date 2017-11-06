@@ -1,3 +1,6 @@
+The cgi stuff is in cgi-bin.
+The create commands for SQL are in cgi-bin/sqlscripts/CreateTables.sql.
+
 To use the cgi stuff it needs to be soft linked.
 
 cd into root of this repo
